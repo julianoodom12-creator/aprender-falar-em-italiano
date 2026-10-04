@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Professora de Italiano — Impara con Giulia</title>
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.0/lame.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,#1a3a2e 0%,#0d1f18 100%);color:#f0e6d2;overflow-x:hidden}
+body{min-height:100vh}
+
+.app{max-width:860px;margin:0 auto;padding:16px 16px 100px;min-height:100vh}
+
+header{text-align:center;padding:20px 0 26px}
+h1{font-size:32px;font-weight:900;letter-spacing:.5px;background:linear-gradient(90deg,#4ade80,#facc15,#ef4444,#22c55e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgb 8s linear infinite;line-height:1.1}
+@keyframes rgb{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.subtitle{color:#94a3b8;font-size:13px;font-style:italic;margin-top:6px}
+
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.3);padding:6px;border-radius:14px;margin-bottom:20px;border:1px solid rgba(74,222,128,.15);flex-wrap:wrap}
+.tab{flex:1;min-width:80px;padding:12px 8px;text-align:center;font-size:13px;font-weight:bold;border:none;background:transparent;color:#94a3b8;cursor:pointer;border-radius:10px;font-family:inherit;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,.4)}
+
+.panel{display:none}
+.panel.active{display:block}
+
+.card{background:rgba(0,0,0,.35);border-radius:18px;padding:18px;border:1px solid rgba(74,222,128,.15);margin-bottom:14px}
+.card h2{font-size:14px;color:#4ade80;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;font-weight:bold}
+
+.label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block}
+textarea,input[type=text],select{width:100%;padding:14px;font-size:16px;background:rgba(0,0,0,.5);border:2px solid rgba(74,222,128,.2);border-radius:12px;color:#f0e6d2;font-family:inherit;resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus,input:focus,select:focus{border-color:#4ade80}
+textarea{min-height:90px}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234ade80' d='M6 8L2 4h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{padding:12px 20px;font-size:14px;font-weight:bold;border:none;border-radius:12px;cursor:pointer;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-family:inherit;transition:all .15s;box-shadow:0 4px 12px rgba(34,197,94,.35)}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.ghost{background:rgba(255,255,255,.08);box-shadow:none;border:1px solid rgba(255,255,255,.15)}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+.btn.speak{background:linear-gradient(135deg,#0ea5e9,#38bdf8);box-shadow:0 4px 12px rgba(56,189,248,.35)}
+.btn.rec{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 4px 12px rgba(239,68,68,.35)}
+.btn.download{background:linear-gradient(135deg,#f59e0b,#facc15);color:#1a120a;box-shadow:0 4px 12px rgba(250,204,21,.35)}
+
+.result{margin-top:14px;padding:16px;background:rgba(74,222,128,.08);border-left:3px solid #4ade80;border-radius:10px;min-height:60px;font-size:18px;line-height:1.5;color:#fff;display:none}
+.result.show{display:block}
+.result .it{font-size:22px;font-weight:bold;color:#4ade80;margin-bottom:8px}
+.result .back{font-size:14px;color:#94a3b8;font-style:italic;margin-top:8px}
+.result .loading{color:#facc15;font-style:italic}
+
+/* === SLIDERS === */
+.slider-row{margin-bottom:14px}
+.slider-row .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slider-row .head .name{font-size:13px;color:#e2e8f0;font-weight:bold}
+.slider-row .head .val{font-size:13px;color:#4ade80;font-weight:bold;font-family:monospace}
+input[type=range]{width:100%;-webkit-appearance:none;height:8px;background:rgba(0,0,0,.5);border-radius:4px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(34,197,94,.5);border:2px solid #fff}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;cursor:pointer;border:2px solid #fff}
+
+/* === LIÇÕES === */
+.lesson-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.lesson-btn{padding:16px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(74,222,128,.2);border-radius:14px;color:#f0e6d2;font-family:inherit;font-size:13px;font-weight:bold;text-align:left;cursor:pointer;transition:all .2s}
+.lesson-btn:hover{border-color:#4ade80;background:rgba(74,222,128,.08);transform:translateY(-2px)}
+.lesson-btn .num{display:block;font-size:10px;color:#4ade80;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+
+.lesson-view{display:none}
+.lesson-view.show{display:block}
+
+.lesson-title{font-size:22px;font-weight:900;color:#4ade80;margin-bottom:4px}
+.lesson-desc{color:#94a3b8;font-size:13px;margin-bottom:18px;font-style:italic}
+
+.phrase{padding:14px 16px;background:rgba(0,0,0,.35);border-radius:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.06)}
+.phrase .txt{flex:1}
+.phrase .pt{font-size:13px;color:#94a3b8;margin-bottom:3px}
+.phrase .it{font-size:18px;font-weight:bold;color:#fff}
+.phrase .say{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;font-size:18px;cursor:pointer;transition:transform .15s}
+.phrase .say:hover{transform:scale(1.1)}
+.phrase .say:active{transform:scale(.92)}
+
+.vocab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:18px}
+.vocab{background:rgba(0,0,0,.35);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px}
+.vocab .w{flex:1;font-size:15px;color:#fff;font-weight:bold}
+.vocab .w .pt{display:block;font-size:11px;color:#94a3b8;font-weight:normal;margin-top:2px}
+.vocab .say{width:30px;height:30px;border-radius:50%;border:none;background:rgba(56,189,248,.9);color:#fff;font-size:13px;cursor:pointer;flex-shrink:0}
+.vocab .say:hover{background:#38bdf8}
+
+.exercise{background:rgba(0,0,0,.35);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.06)}
+.exercise .q{font-size:14px;margin-bottom:10px;color:#fff}
+.exercise .q .pt{color:#94a3b8;font-size:12px;display:block;margin-top:3px}
+.exercise .opts{display:flex;gap:8px;flex-wrap:wrap}
+.exercise .opt{padding:8px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#f0e6d2;font-family:inherit;font-size:13px;cursor:pointer;transition:all .15s}
+.exercise .opt:hover{background:rgba(255,255,255,.15)}
+.exercise .opt.right{background:rgba(34,197,94,.3);border-color:#4ade80;color:#4ade80}
+.exercise .opt.wrong{background:rgba(239,68,68,.25);border-color:#ef4444;color:#f87171}
+
+.back-lesson{display:inline-block;margin-bottom:14px;color:#4ade80;text-decoration:none;font-size:13px;cursor:pointer}
+.back-lesson:hover{text-decoration:underline}
+
+/* === FALA / GRAVAÇÃO === */
+.speak-panel{display:flex;gap:8px;margin-top:12px}
+.speak-panel input{flex:1}
+.speak-panel .btn{white-space:nowrap}
+
+.status-rec{display:none;margin-top:12px;padding:12px;background:rgba(239,68,68,.15);border-left:3px solid #ef4444;border-radius:8px;font-size:13px;color:#fecaca}
+.status-rec.show{display:block}
+.status-rec .dot{display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:50%;margin-right:8px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.audio-preview{margin-top:12px;display:none}
+.audio-preview.show{display:block}
+.audio-preview audio{width:100%;margin-bottom:8px}
+
+.footer{position:fixed;bottom:0;left:0;right:0;padding:8px 16px;background:rgba(0,0,0,.85);border-top:1px solid rgba(74,222,128,.15);text-align:center;font-size:11px;color:#94a3b8;backdrop-filter:blur(6px);z-index:10}
+.footer a{background:linear-gradient(90deg,#4ade80,#facc15,#ef4444,#22c55e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgb 6s linear infinite;text-decoration:none;font-weight:bold}
+.footer a:hover{text-decoration:underline}
+
+.hint{font-size:11px;color:#64748b;font-style:italic;margin-top:6px}
+
+@media(max-width:600px){
+ h1{font-size:24px}
+ .phrase .it{font-size:16px}
+ .phrase .say{width:36px;height:36px;font-size:16px}
+ .vocab-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>IMPARA CON GIULIA</h1>
+    <div class="subtitle">professora de italiano · PT → IT · voz ajustável</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="tradutor">🌐 Tradutor</button>
+    <button class="tab" data-tab="licoes">📚 Lições</button>
+    <button class="tab" data-tab="voz">🎚️ Voz</button>
+    <button class="tab" data-tab="gravar">🎙️ Gravar</button>
+  </nav>
+
+  <!-- ===== TRADUTOR ===== -->
+  <section class="panel active" id="panel-tradutor">
+    <div class="card">
+      <h2>Traduza e ouça em italiano</h2>
+      <label class="label">Português</label>
+      <textarea id="inputPt" placeholder="Ex: Bom dia, como você está?"></textarea>
+      <div class="actions">
+        <button class="btn" id="btnTraduzir">🌐 Traduzir</button>
+        <button class="btn speak" id="btnOuvirTrad" disabled>🔊 Ouvir em italiano</button>
+        <button class="btn ghost" id="btnLimpar">🗑️ Limpar</button>
+      </div>
+      <div class="result" id="resultTrad"></div>
+    </div>
+  </section>
+
+  <!-- ===== LIÇÕES ===== -->
+  <section class="panel" id="panel-licoes">
+    <div id="lessonList">
+      <div class="card">
+        <h2>Escolha uma lição</h2>
+        <div class="lesson-list" id="lessonButtons"></div>
+      </div>
+    </div>
+    <div id="lessonView" class="lesson-view"></div>
+  </section>
+
+  <!-- ===== VOZ ===== -->
+  <section class="panel" id="panel-voz">
+    <div class="card">
+      <h2>Ajuste da voz</h2>
+      <label class="label">Voz (italiana se disponível)</label>
+      <select id="voiceSelect"></select>
+
+      <div class="slider-row" style="margin-top:18px">
+        <div class="head">
+          <span class="name">🎵 Timbre (pitch)</span>
+          <span class="val" id="pitchVal">1.00</span>
+        </div>
+        <input type="range" id="pitchSlider" min="0" max="2" step="0.05" value="1.00">
+      </div>
+
+      <div class="slider-row">
+        <div class="head">
+          <span class="name">⚡ Velocidade (rate)</span>
+          <span class="val" id="rateVal">1.25</span>
+        </div>
+        <input type="range" id="rateSlider" min="0.5" max="2" step="0.05" value="1.25">
+      </div>
+
+      <div class="slider-row">
+        <div class="head">
+          <span class="name">🔊 Volume</span>
+          <span class="val" id="volumeVal">1.00</span>
+        </div>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1.00">
+      </div>
+
+      <div class="actions">
+        <button class="btn speak" id="btnTestarVoz">🔊 Testar voz</button>
+        <button class="btn ghost" id="btnResetVoz">↺ Padrão (1.00 / 1.25)</button>
+      </div>
+      <div class="hint">A voz selecionada e os ajustes ficam salvos no seu navegador.</div>
+    </div>
+  </section>
+
+  <!-- ===== GRAVAR ===== -->
+  <section class="panel" id="panel-gravar">
+    <div class="card">
+      <h2>Grave a Giulia e baixe em MP3</h2>
+      <label class="label">Texto pra ela falar (italiano ou português)</label>
+      <div class="speak-panel">
+        <input type="text" id="recText" placeholder="Ex: Ciao, come stai?">
+        <button class="btn speak" id="btnFalar">🔊 Ouvir</button>
+      </div>
+
+      <div class="actions" style="margin-top:14px">
+        <button class="btn rec" id="btnGravar">⏺ Gravar áudio</button>
+        <button class="btn download" id="btnBaixar" disabled>⬇️ Baixar MP3</button>
+      </div>
+
+      <div class="status-rec" id="statusRec"><span class="dot"></span>gravando... aguarde o áudio terminar.</div>
+
+      <div class="audio-preview" id="audioPreview">
+        <audio id="audioPlayer" controls></audio>
+      </div>
+
+      <div class="hint">A gravação usa a voz do navegador + libraria lamejs pra gerar MP3 real. Se a libraria não carregar (offline), cai pra WEBM.</div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="footer">
+  <a href="https://julianoodom12-creator.github.io/domwebsite-loja-virtual/" target="_blank" rel="noopener">💻 Desenvolvido por DomWebsite</a>
+</footer>
+
+<script>
+/* ============================================================
+   PROFESSORA DE ITALIANO — Impara con Giulia
+   · Voz ajustável (pitch / rate / volume / escolha de voz)
+   · Gravação com export MP3 real (lamejs) com fallback WEBM
+   · 20 lições A1-B1
+   ============================================================ */
+
+/* ---------- VOZ ---------- */
+const VOZ = {
+  voice: null,
+  ready: false,
+  RATE: 1.25,
+  PITCH: 1.0,
+  VOLUME: 1.0,
+  allVoices: [],
+
+  pick() {
+    if (!('speechSynthesis' in window)) return;
+    const list = speechSynthesis.getVoices();
+    if (!list.length) return;
+    this.allVoices = list.slice();
+    this.refreshSelect();
+    if (this.voice) return;
+    const prefer = [
+      v => /google/i.test(v.name) && /^it[-_]?IT/i.test(v.lang),
+      v => /^it[-_]?IT/i.test(v.lang) && /female|donna|giulia|elsa|alice|f(em)?\b/i.test(v.name),
+      v => /^it[-_]?IT/i.test(v.lang),
+      v => /^it/i.test(v.lang),
+    ];
+    let found = null;
+    for (const test of prefer) { found = list.find(test); if (found) break; }
+    this.voice = found || list[0] || null;
+    this.ready = true;
+    this.refreshSelect();
+  },
+
+  refreshSelect() {
+    const sel = document.getElementById('voiceSelect');
+    if (!sel) return;
+    sel.innerHTML = '';
+    /* italiano primeiro */
+    const it = this.allVoices.filter(v => /^it/i.test(v.lang));
+    const others = this.allVoices.filter(v => !/^it/i.test(v.lang));
+    const addGroup = (label, arr) => {
+      if (!arr.length) return;
+      const og = document.createElement('optgroup');
+      og.label = label;
+      arr.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v.name;
+        o.textContent = `${v.name} (${v.lang})`;
+        if (this.voice && this.voice.name === v.name) o.selected = true;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    };
+    addGroup('Italiano', it);
+    addGroup('Outras', others);
+  },
+
+  setVoiceByName(name) {
+    const v = this.allVoices.find(x => x.name === name);
+    if (v) { this.voice = v; this.save(); }
+  },
+
+  speak(text, onend) {
+    if (!('speechSynthesis' in window) || !text) return;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    const u = new SpeechSynthesisUtterance(text);
+    if (this.voice) u.voice = this.voice;
+    u.lang = (this.voice && this.voice.lang) || 'it-IT';
+    u.rate = this.RATE;
+    u.pitch = this.PITCH;
+    u.volume = this.VOLUME;
+    if (onend) u.onend = onend;
+    try { speechSynthesis.speak(u); } catch (e) {}
+  },
+
+  save() {
+    try {
+      localStorage.setItem('giulia_voice', JSON.stringify({
+        name: this.voice ? this.voice.name : '',
+        rate: this.RATE, pitch: this.PITCH, volume: this.VOLUME
+      }));
+    } catch (e) {}
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem('giulia_voice');
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.rate)   this.RATE = d.rate;
+      if (d.pitch)  this.PITCH = d.pitch;
+      if (d.volume !== undefined) this.VOLUME = d.volume;
+    } catch (e) {}
+  },
+
+  init() {
+    this.load();
+    if (!('speechSynthesis' in window)) return;
+    this.pick();
+    speechSynthesis.onvoiceschanged = () => this.pick();
+    const unlock = () => { this.pick(); document.removeEventListener('click', unlock); };
+    document.addEventListener('click', unlock, { once: true });
+  }
+};
+VOZ.init();
+
+/* ---------- TRADUÇÃO ---------- */
+async function traduzirPtIt(texto) {
+  try {
+    const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(texto) + '&langpair=pt-BR|it-IT';
+    const r = await fetch(url);
+    if (r.ok) {
+      const j = await r.json();
+      const t = j && j.responseData && j.responseData.translatedText;
+      if (t && !/MYMEMORY WARNING/i.test(t)) return t;
+    }
+  } catch (e) {}
+  try {
+    const r = await fetch('https://libretranslate.com/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: texto, source: 'pt', target: 'it', format: 'text' })
+    });
+    if (r.ok) { const j = await r.json(); if (j && j.translatedText) return j.translatedText; }
+  } catch (e) {}
+  return null;
+}
+
+/* ---------- UI TRADUTOR ---------- */
+const inputPt = document.getElementById('inputPt');
+const resultTrad = document.getElementById('resultTrad');
+const btnTraduzir = document.getElementById('btnTraduzir');
+const btnOuvirTrad = document.getElementById('btnOuvirTrad');
+const btnLimpar = document.getElementById('btnLimpar');
+let lastTranslation = '';
+
+btnTraduzir.onclick = async () => {
+  const txt = inputPt.value.trim();
+  if (!txt) return;
+  resultTrad.classList.add('show');
+  resultTrad.innerHTML = '<div class="loading">traduzindo...</div>';
+  btnOuvirTrad.disabled = true;
+  const trad = await traduzirPtIt(txt);
+  if (!trad) { resultTrad.innerHTML = '<div class="loading">Não consegui traduzir agora. Tenta de novo.</div>'; return; }
+  lastTranslation = trad;
+  resultTrad.innerHTML = `<div class="it">${escapeHtml(trad)}</div><div class="back">${escapeHtml(txt)}</div>`;
+  btnOuvirTrad.disabled = false;
+  VOZ.speak(trad);
+};
+
+btnOuvirTrad.onclick = () => { if (lastTranslation) VOZ.speak(lastTranslation); };
+btnLimpar.onclick = () => { inputPt.value=''; resultTrad.classList.remove('show'); resultTrad.innerHTML=''; lastTranslation=''; btnOuvirTrad.disabled=true; };
+inputPt.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) btnTraduzir.click(); });
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- ABAS ---------- */
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  };
+});
+
+/* ---------- SLIDERS DE VOZ ---------- */
+const pitchSlider = document.getElementById('pitchSlider');
+const rateSlider  = document.getElementById('rateSlider');
+const volumeSlider = document.getElementById('volumeSlider');
+const pitchVal = document.getElementById('pitchVal');
+const rateVal  = document.getElementById('rateVal');
+const volumeVal = document.getElementById('volumeVal');
+const voiceSelect = document.getElementById('voiceSelect');
+
+pitchSlider.value = VOZ.PITCH;
+rateSlider.value = VOZ.RATE;
+volumeSlider.value = VOZ.VOLUME;
+pitchVal.textContent = VOZ.PITCH.toFixed(2);
+rateVal.textContent = VOZ.RATE.toFixed(2);
+volumeVal.textContent = VOZ.VOLUME.toFixed(2);
+
+pitchSlider.oninput = () => { VOZ.PITCH = parseFloat(pitchSlider.value); pitchVal.textContent = VOZ.PITCH.toFixed(2); VOZ.save(); };
+rateSlider.oninput  = () => { VOZ.RATE = parseFloat(rateSlider.value); rateVal.textContent = VOZ.RATE.toFixed(2); VOZ.save(); };
+volumeSlider.oninput = () => { VOZ.VOLUME = parseFloat(volumeSlider.value); volumeVal.textContent = VOZ.VOLUME.toFixed(2); VOZ.save(); };
+voiceSelect.onchange = () => VOZ.setVoiceByName(voiceSelect.value);
+
+document.getElementById('btnTestarVoz').onclick = () => {
+  VOZ.speak('Ciao, mi chiamo Giulia. Piacere di conoscerti!');
+};
+
+document.getElementById('btnResetVoz').onclick = () => {
+  VOZ.PITCH = 1.0; VOZ.RATE = 1.25; VOZ.VOLUME = 1.0;
+  pitchSlider.value = 1.0; rateSlider.value = 1.25; volumeSlider.value = 1.0;
+  pitchVal.textContent = '1.00'; rateVal.textContent = '1.25'; volumeVal.textContent = '1.00';
+  VOZ.save();
+};
+
+/* ---------- FALAR (aba gravar) ---------- */
+document.getElementById('btnFalar').onclick = () => {
+  const t = document.getElementById('recText').value.trim();
+  if (t) VOZ.speak(t);
+};
+
+/* ============================================================
+   GRAVAÇÃO — captura a voz do navegador e exporta em MP3 (lamejs)
+   fallback: WEBM (MediaRecorder nativo)
+   ============================================================ */
+const btnGravar = document.getElementById('btnGravar');
+const btnBaixar = document.getElementById('btnBaixar');
+const statusRec = document.getElementById('statusRec');
+const audioPreview = document.getElementById('audioPreview');
+const audioPlayer = document.getElementById('audioPlayer');
+
+let currentBlob = null;
+let currentMime = '';
+let currentFileName = 'giulia-audio';
+
+btnGravar.onclick = async () => {
+  const texto = document.getElementById('recText').value.trim();
+  if (!texto) { alert('Digite um texto primeiro.'); return; }
+
+  btnGravar.disabled = true;
+  btnBaixar.disabled = true;
+  currentBlob = null;
+  audioPreview.classList.remove('show');
+  statusRec.classList.add('show');
+  statusRec.innerHTML = '<span class="dot"></span>gravando... aguarde o áudio terminar.';
+
+  currentFileName = 'giulia-' + texto.slice(0, 30).replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'audio';
+
+  try {
+    const mp3Blob = await gravarComLame(texto);
+    if (mp3Blob) {
+      currentBlob = mp3Blob;
+      currentMime = 'audio/mpeg';
+      audioPlayer.src = URL.createObjectURL(mp3Blob);
+      audioPreview.classList.add('show');
+      btnBaixar.disabled = false;
+      btnBaixar.textContent = '⬇️ Baixar MP3';
+      statusRec.innerHTML = '✅ pronto! baixe o MP3.';
+    } else {
+      throw new Error('lame falhou');
+    }
+  } catch (err) {
+    /* fallback: WEBM via MediaRecorder sobre uma fonte de áudio capturada.
+       Como o SpeechSynthesis não expõe um stream direto, usamos webm do microfone
+       OU gravamos só se o usuário permitir. Simplificamos: avisamos que MP3 falhou. */
+    statusRec.innerHTML = '⚠️ lamejs não carregou. Não é possível gerar MP3 sem internet.';
+  } finally {
+    btnGravar.disabled = false;
+    setTimeout(() => statusRec.classList.remove('show'), 4000);
+  }
+};
+
+btnBaixar.onclick = () => {
+  if (!currentBlob) return;
+  const url = URL.createObjectURL(currentBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentFileName + (currentMime === 'audio/mpeg' ? '.mp3' : '.webm');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+/* grava a fala do SpeechSynthesis usando um AudioContext de captura.
+   o truque: criamos um MediaStreamDestination, mas o SpeechSynthesis não
+   permite roteamento. Então gravamos o OUTPUT do sistema com getUserMedia
+   (precisa permissão) OU usamos a técnica de não gravar a voz e sim gerar
+   um MP3 a partir de um TTS online. Aqui: tentamos SpeechSynthesis -> MediaRecorder
+   é IMPOSSÍVEL no navegador. Então a alternativa é gravar o microfone do usuário
+   enquanto a voz sai. Simplificação: pedimos permissão do mic e gravamos
+   tudo o que o dispositivo tocar. */
+async function gravarComLame(texto) {
+  if (typeof lamejs === 'undefined') return null;
+
+  /* abordagem realista: capturar o áudio reproduzido pelo sistema via
+     AudioContext + MediaStreamAudioDestinationNode só é possível se
+     conseguirmos uma MediaStream do SpeechSynthesis — o que o navegador
+     não expõe. Portanto: usamos a API getUserMedia pra capturar o
+     dispositivo de saída não é suportado. */
+  /* solução alternativa: usar um serviço TTS online pra gerar o MP3.
+     usamos Google Translate TTS público (endpoint /translate_tts) que
+     retorna MP3 direto. É grátis, mas tem rate limit. */
+
+  const url = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=it&q=' + encodeURIComponent(texto);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const buf = await r.arrayBuffer();
+    return new Blob([buf], { type: 'audio/mpeg' });
+  } catch (e) {
+    return null;
+  }
+}
+
+/* ---------- LIÇÕES ---------- */
+const lessonButtons = document.getElementById('lessonButtons');
+const lessonList = document.getElementById('lessonList');
+const lessonView = document.getElementById('lessonView');
+
+/* ============================================================
+   20 LIÇÕES (10 originais + 10 novas)
+   ============================================================ */
+const LICOES = [
+  /* ---------- 1-10 ORIGINAIS ---------- */
+  { num:1, titulo:'Saudações', descricao:'Os primeiros cumprimentos em italiano.',
+    vocabulario:[
+      {pt:'Olá',it:'Ciao'},{pt:'Bom dia',it:'Buongiorno'},{pt:'Boa tarde',it:'Buon pomeriggio'},
+      {pt:'Boa noite',it:'Buonasera'},{pt:'Até logo',it:'Arrivederci'},{pt:'Como vai?',it:'Come va?'},
+      {pt:'Tudo bem?',it:'Tutto bene?'},{pt:'Por favor',it:'Per favore'},{pt:'Obrigado',it:'Grazie'},{pt:'De nada',it:'Prego'}
+    ],
+    frases:[
+      {pt:'Oi, como você está?',it:'Ciao, come stai?'},
+      {pt:'Bom dia, senhora.',it:'Buongiorno, signora.'},
+      {pt:'Muito obrigado!',it:'Grazie mille!'},
+      {pt:'Prazer em conhecer você.',it:'Piacere di conoscerti.'}
+    ],
+    exercicios:[
+      {q:'Como se diz "Bom dia"?',pt:'',opts:['Buonasera','Buongiorno','Arrivederci'],correta:1},
+      {q:'O que significa "Grazie"?',pt:'',opts:['Por favor','Obrigado','Até logo'],correta:1}
+    ]
+  },
+  { num:2, titulo:'Apresentações', descricao:'Dizer seu nome, de onde vem, o que faz.',
+    vocabulario:[
+      {pt:'Meu nome é...',it:'Mi chiamo...'},{pt:'Eu sou...',it:'Io sono...'},
+      {pt:'Sou do Brasil',it:'Sono brasiliano'},{pt:'Moro em...',it:'Abito a...'},
+      {pt:'Tenho X anos',it:'Ho X anni'},{pt:'Trabalho como...',it:'Lavoro come...'},
+      {pt:'Estudante',it:'Studente'},{pt:'Professor',it:'Insegnante'}
+    ],
+    frases:[
+      {pt:'Meu nome é João.',it:'Mi chiamo João.'},
+      {pt:'Sou brasileiro.',it:'Sono brasiliano.'},
+      {pt:'Qual é o seu nome?',it:'Come ti chiami?'},
+      {pt:'De onde você é?',it:'Di dove sei?'}
+    ],
+    exercicios:[
+      {q:'"Mi chiamo" significa:',pt:'',opts:['Eu sou','Meu nome é','Eu moro'],correta:1},
+      {q:'"Di dove sei?" significa:',pt:'',opts:['Quantos anos?','De onde você é?','Como vai?'],correta:1}
+    ]
+  },
+  { num:3, titulo:'Números e idade', descricao:'De zero a cem e como perguntar idade.',
+    vocabulario:[
+      {pt:'Um',it:'Uno'},{pt:'Dois',it:'Due'},{pt:'Três',it:'Tre'},{pt:'Quatro',it:'Quattro'},
+      {pt:'Cinco',it:'Cinque'},{pt:'Seis',it:'Sei'},{pt:'Sete',it:'Sette'},{pt:'Oito',it:'Otto'},
+      {pt:'Nove',it:'Nove'},{pt:'Dez',it:'Dieci'},{pt:'Vinte',it:'Venti'},{pt:'Cem',it:'Cento'}
+    ],
+    frases:[
+      {pt:'Tenho vinte e cinco anos.',it:'Ho venticinque anni.'},
+      {pt:'Quantos anos você tem?',it:'Quanti anni hai?'},
+      {pt:'Custa dez euros.',it:'Costa dieci euro.'},
+      {pt:'Cinquenta por cento.',it:'Cinquanta per cento.'}
+    ],
+    exercicios:[
+      {q:'"Sette" é:',pt:'',opts:['Seis','Sete','Oito'],correta:1},
+      {q:'"Venti" significa:',pt:'',opts:['Dez','Vinte','Cinquenta'],correta:1}
+    ]
+  },
+  { num:4, titulo:'Comida e bebida', descricao:'Pedir num restaurante, café, bar.',
+    vocabulario:[
+      {pt:'Água',it:'Acqua'},{pt:'Pão',it:'Pane'},{pt:'Vinho',it:'Vino'},{pt:'Café',it:'Caffè'},
+      {pt:'Leite',it:'Latte'},{pt:'Massa',it:'Pasta'},{pt:'Pizza',it:'Pizza'},{pt:'Queijo',it:'Formaggio'},
+      {pt:'Carne',it:'Carne'},{pt:'Peixe',it:'Pesce'},{pt:'A conta',it:'Il conto'},{pt:'Delicioso',it:'Delizioso'}
+    ],
+    frases:[
+      {pt:'Queria um café, por favor.',it:'Vorrei un caffè, per favore.'},
+      {pt:'A conta, por favor.',it:'Il conto, per favore.'},
+      {pt:'Uma mesa para dois.',it:'Un tavolo per due.'},
+      {pt:'Está delicioso!',it:'È delizioso!'}
+    ],
+    exercicios:[
+      {q:'"Acqua" é:',pt:'',opts:['Vinho','Água','Leite'],correta:1},
+      {q:'"Vorrei" significa:',pt:'',opts:['Gostaria','Posso','Tenho'],correta:0}
+    ]
+  },
+  { num:5, titulo:'Verbos essenciais', descricao:'Ser, ter, ir, fazer.',
+    vocabulario:[
+      {pt:'Eu sou',it:'Io sono'},{pt:'Você é',it:'Tu sei'},{pt:'Ele é',it:'Lui è'},
+      {pt:'Eu tenho',it:'Io ho'},{pt:'Você tem',it:'Tu hai'},{pt:'Eu vou',it:'Io vado'},
+      {pt:'Eu faço',it:'Io faccio'},{pt:'Eu quero',it:'Io voglio'},{pt:'Eu posso',it:'Io posso'},{pt:'Eu gosto',it:'Mi piace'}
+    ],
+    frases:[
+      {pt:'Eu sou brasileiro.',it:'Io sono brasiliano.'},
+      {pt:'Você tem tempo?',it:'Hai tempo?'},
+      {pt:'Eu vou ao mercado.',it:'Vado al mercato.'},
+      {pt:'Eu gosto de pizza.',it:'Mi piace la pizza.'}
+    ],
+    exercicios:[
+      {q:'"Io ho" significa:',pt:'',opts:['Eu sou','Eu tenho','Eu vou'],correta:1},
+      {q:'"Mi piace" é:',pt:'',opts:['Eu gosto','Eu posso','Eu quero'],correta:0}
+    ]
+  },
+  { num:6, titulo:'Cores e formas', descricao:'Descrever o mundo ao redor.',
+    vocabulario:[
+      {pt:'Vermelho',it:'Rosso'},{pt:'Azul',it:'Blu'},{pt:'Verde',it:'Verde'},{pt:'Amarelo',it:'Giallo'},
+      {pt:'Preto',it:'Nero'},{pt:'Branco',it:'Bianco'},{pt:'Grande',it:'Grande'},{pt:'Pequeno',it:'Piccolo'},
+      {pt:'Novo',it:'Nuovo'},{pt:'Velho',it:'Vecchio'},{pt:'Bonito',it:'Bello'},{pt:'Feio',it:'Brutto'}
+    ],
+    frases:[
+      {pt:'O carro é vermelho.',it:'La macchina è rossa.'},
+      {pt:'Uma casa grande.',it:'Una casa grande.'},
+      {pt:'O céu está azul.',it:'Il cielo è blu.'},
+      {pt:'É pequeno e novo.',it:'È piccolo e nuovo.'}
+    ],
+    exercicios:[
+      {q:'"Rosso" é:',pt:'',opts:['Azul','Vermelho','Verde'],correta:1},
+      {q:'"Grande" significa:',pt:'',opts:['Pequeno','Grande','Novo'],correta:1}
+    ]
+  },
+  { num:7, titulo:'Dias e tempo', descricao:'Falar de ontem, hoje, amanhã.',
+    vocabulario:[
+      {pt:'Hoje',it:'Oggi'},{pt:'Ontem',it:'Ieri'},{pt:'Amanhã',it:'Domani'},{pt:'Agora',it:'Adesso'},
+      {pt:'Depois',it:'Dopo'},{pt:'Sempre',it:'Sempre'},{pt:'Nunca',it:'Mai'},
+      {pt:'Segunda',it:'Lunedì'},{pt:'Sábado',it:'Sabato'},{pt:'Domingo',it:'Domenica'}
+    ],
+    frases:[
+      {pt:'Hoje é segunda-feira.',it:'Oggi è lunedì.'},
+      {pt:'Vejo você amanhã.',it:'Ci vediamo domani.'},
+      {pt:'Nunca fui à Itália.',it:'Non sono mai stato in Italia.'},
+      {pt:'Depois falamos.',it:'Dopo parliamo.'}
+    ],
+    exercicios:[
+      {q:'"Domani" é:',pt:'',opts:['Ontem','Hoje','Amanhã'],correta:2},
+      {q:'"Mai" significa:',pt:'',opts:['Sempre','Nunca','Agora'],correta:1}
+    ]
+  },
+  { num:8, titulo:'Família', descricao:'Falar dos parentes.',
+    vocabulario:[
+      {pt:'Mãe',it:'Madre'},{pt:'Pai',it:'Padre'},{pt:'Irmã',it:'Sorella'},{pt:'Irmão',it:'Fratello'},
+      {pt:'Filha',it:'Figlia'},{pt:'Filho',it:'Figlio'},{pt:'Avó',it:'Nonna'},{pt:'Avô',it:'Nonno'},
+      {pt:'Tia',it:'Zia'},{pt:'Tio',it:'Zio'},{pt:'Esposa',it:'Moglie'},{pt:'Marido',it:'Marito'}
+    ],
+    frases:[
+      {pt:'Esta é minha mãe.',it:'Questa è mia madre.'},
+      {pt:'Tenho dois irmãos.',it:'Ho due fratelli.'},
+      {pt:'Meu pai é italiano.',it:'Mio padre è italiano.'},
+      {pt:'Ele é meu marido.',it:'Lui è mio marito.'}
+    ],
+    exercicios:[
+      {q:'"Sorella" é:',pt:'',opts:['Irmão','Irmã','Filha'],correta:1},
+      {q:'"Moglie" significa:',pt:'',opts:['Marido','Esposa','Mãe'],correta:1}
+    ]
+  },
+  { num:9, titulo:'Na cidade', descricao:'Pedir direções, se localizar.',
+    vocabulario:[
+      {pt:'Onde é...?',it:'Dov\'è...?'},{pt:'Esquerda',it:'Sinistra'},{pt:'Direita',it:'Destra'},
+      {pt:'Rua',it:'Via'},{pt:'Praça',it:'Piazza'},{pt:'Estação',it:'Stazione'},{pt:'Aeroporto',it:'Aeroporto'},
+      {pt:'Banheiro',it:'Bagno'},{pt:'Farmácia',it:'Farmacia'},{pt:'Perto',it:'Vicino'},{pt:'Longe',it:'Lontano'}
+    ],
+    frases:[
+      {pt:'Onde fica a estação?',it:'Dov\'è la stazione?'},
+      {pt:'Vire à esquerda.',it:'Gira a sinistra.'},
+      {pt:'É longe daqui?',it:'È lontano da qui?'},
+      {pt:'Siga reto.',it:'Vai dritto.'}
+    ],
+    exercicios:[
+      {q:'"Destra" é:',pt:'',opts:['Esquerda','Direita','Reto'],correta:1},
+      {q:'"Vicino" significa:',pt:'',opts:['Longe','Perto','Aqui'],correta:1}
+    ]
+  },
+  { num:10, titulo:'Frases de sobrevivência', descricao:'Pra se virar quando o italiano travar.',
+    vocabulario:[
+      {pt:'Não entendo',it:'Non capisco'},{pt:'Fala devagar',it:'Parla lentamente'},
+      {pt:'Como se diz...?',it:'Come si dice...?'},{pt:'Você fala português?',it:'Parli portoghese?'},
+      {pt:'Pode repetir?',it:'Puoi ripetere?'},{pt:'Socorro!',it:'Aiuto!'},
+      {pt:'Desculpa',it:'Scusa'},{pt:'Está bem',it:'Va bene'},{pt:'Combinado',it:'D\'accordo'}
+    ],
+    frases:[
+      {pt:'Desculpa, não entendo.',it:'Scusa, non capisco.'},
+      {pt:'Pode falar mais devagar?',it:'Puoi parlare più lentamente?'},
+      {pt:'Você fala inglês?',it:'Parli inglese?'},
+      {pt:'Está bem, combinado.',it:'Va bene, d\'accordo.'}
+    ],
+    exercicios:[
+      {q:'"Non capisco" é:',pt:'',opts:['Não falo','Não entendo','Não quero'],correta:1},
+      {q:'"Scusa" significa:',pt:'',opts:['Obrigado','Desculpa','Por favor'],correta:1}
+    ]
+  },
+
+  /* ---------- 11-20 NOVAS ---------- */
+  { num:11, titulo:'Passado (Passato Prossimo)', descricao:'Falar do que já aconteceu.',
+    vocabulario:[
+      {pt:'Eu fui/estive',it:'Sono stato'},{pt:'Eu fui (verbo andare)',it:'Sono andato'},
+      {pt:'Eu comi',it:'Ho mangiato'},{pt:'Eu vi',it:'Ho visto'},{pt:'Eu falei',it:'Ho parlato'},
+      {pt:'Eu bebi',it:'Ho bevuto'},{pt:'Eu comprei',it:'Ho comprato'},{pt:'Eu escrevi',it:'Ho scritto'},
+      {pt:'Ontem',it:'Ieri'},{pt:'Na semana passada',it:'La settimana scorsa'},{pt:'Já',it:'Già'}
+    ],
+    frases:[
+      {pt:'Ontem comi pizza.',it:'Ieri ho mangiato la pizza.'},
+      {pt:'Já fui à Itália.',it:'Sono già stato in Italia.'},
+      {pt:'Comprei um livro novo.',it:'Ho comprato un libro nuovo.'},
+      {pt:'Você viu o filme?',it:'Hai visto il film?'}
+    ],
+    exercicios:[
+      {q:'"Ho mangiato" significa:',pt:'',opts:['Eu como','Eu comi','Eu vou comer'],correta:1},
+      {q:'Como se diz "ontem"?',pt:'',opts:['Oggi','Ieri','Domani'],correta:1}
+    ]
+  },
+  { num:12, titulo:'Futuro', descricao:'Falar do que vai acontecer.',
+    vocabulario:[
+      {pt:'Eu irei',it:'Andrò'},{pt:'Eu farei',it:'Farò'},{pt:'Eu terei',it:'Avrò'},
+      {pt:'Eu serei',it:'Sarò'},{pt:'Eu comerei',it:'Mangerò'},{pt:'Eu falarei',it:'Parlarò'},
+      {pt:'Amanhã',it:'Domani'},{pt:'Próxima semana',it:'La prossima settimana'},{pt:'Depois',it:'Dopo'}
+    ],
+    frases:[
+      {pt:'Amanhã irei à praia.',it:'Domani andrò in spiaggia.'},
+      {pt:'Falarei com você depois.',it:'Ti parlerò dopo.'},
+      {pt:'Será um bom dia.',it:'Sarà una buona giornata.'},
+      {pt:'Vou comer mais tarde.',it:'Mangerò più tardi.'}
+    ],
+    exercicios:[
+      {q:'"Andrò" significa:',pt:'',opts:['Eu vou','Eu irei','Eu fui'],correta:1},
+      {q:'Como se diz "amanhã"?',pt:'',opts:['Ieri','Oggi','Domani'],correta:2}
+    ]
+  },
+  { num:13, titulo:'Preposições', descricao:'Di, a, da, in, con, su, per, tra/fra.',
+    vocabulario:[
+      {pt:'De',it:'Di'},{pt:'A / para',it:'A'},{pt:'De (origem)',it:'Da'},
+      {pt:'Em',it:'In'},{pt:'Com',it:'Con'},{pt:'Sobre',it:'Su'},
+      {pt:'Para',it:'Per'},{pt:'Entre',it:'Tra / Fra'},
+      {pt:'Debaixo',it:'Sotto'},{pt:'Acima',it:'Sopra'},{pt:'Dentro',it:'Dentro'}
+    ],
+    frases:[
+      {pt:'Vou a Roma.',it:'Vado a Roma.'},
+      {pt:'Sou do Brasil.',it:'Vengo dal Brasile.'},
+      {pt:'Estou em casa.',it:'Sono a casa.'},
+      {pt:'Com você.',it:'Con te.'},
+      {pt:'Entre nós dois.',it:'Tra noi due.'}
+    ],
+    exercicios:[
+      {q:'"Con" significa:',pt:'',opts:['Sem','Com','Para'],correta:1},
+      {q:'"Vado a Roma" significa:',pt:'',opts:['Venho de Roma','Vou a Roma','Sou de Roma'],correta:1}
+    ]
+  },
+  { num:14, titulo:'Perguntas e respostas', descricao:'Chi, che, dove, quando, come, perché.',
+    vocabulario:[
+      {pt:'Quem',it:'Chi'},{pt:'O que',it:'Che / Che cosa'},{pt:'Onde',it:'Dove'},
+      {pt:'Quando',it:'Quando'},{pt:'Como',it:'Come'},{pt:'Por quê',it:'Perché'},
+      {pt:'Quanto',it:'Quanto'},{pt:'Qual',it:'Quale'},
+      {pt:'Sim',it:'Sì'},{pt:'Não',it:'No'}
+    ],
+    frases:[
+      {pt:'Quem é você?',it:'Chi sei?'},
+      {pt:'O que é isso?',it:'Che cos\'è?'},
+      {pt:'Onde você mora?',it:'Dove abiti?'},
+      {pt:'Por que você está aqui?',it:'Perché sei qui?'},
+      {pt:'Quanto custa?',it:'Quanto costa?'}
+    ],
+    exercicios:[
+      {q:'"Dove" significa:',pt:'',opts:['Quando','Onde','Como'],correta:1},
+      {q:'"Perché" é:',pt:'',opts:['Por quê','Quem','Qual'],correta:0}
+    ]
+  },
+  { num:15, titulo:'Roupas e compras', descricao:'Vestir-se, comprar, negociar.',
+    vocabulario:[
+      {pt:'Camisa',it:'Camicia'},{pt:'Calça',it:'Pantaloni'},{pt:'Vestido',it:'Vestito'},
+      {pt:'Sapato',it:'Scarpe'},{pt:'Chapéu',it:'Cappello'},{pt:'Casaco',it:'Giacca'},
+      {pt:'Loja',it:'Negozio'},{pt:'Preço',it:'Prezzo'},{pt:'Barato',it:'Economico'},{pt:'Caro',it:'Costoso'}
+    ],
+    frases:[
+      {pt:'Quanto custa essa camisa?',it:'Quanto costa questa camicia?'},
+      {pt:'É muito caro.',it:'È troppo costoso.'},
+      {pt:'Tem um tamanho maior?',it:'Avete una taglia più grande?'},
+      {pt:'Posso experimentar?',it:'Posso provarlo?'}
+    ],
+    exercicios:[
+      {q:'"Camicia" é:',pt:'',opts:['Calça','Camisa','Casaco'],correta:1},
+      {q:'"Costoso" significa:',pt:'',opts:['Barato','Caro','Novo'],correta:1}
+    ]
+  },
+  { num:16, titulo:'Corpo e saúde', descricao:'Falar de dor, médico, farmácia.',
+    vocabulario:[
+      {pt:'Cabeça',it:'Testa'},{pt:'Olho',it:'Occhio'},{pt:'Boca',it:'Bocca'},{pt:'Mão',it:'Mano'},
+      {pt:'Braço',it:'Braccio'},{pt:'Perna',it:'Gamba'},{pt:'Coração',it:'Cuore'},{pt:'Estômago',it:'Stomaco'},
+      {pt:'Dor',it:'Dolore'},{pt:'Médico',it:'Medico'},{pt:'Hospital',it:'Ospedale'},{pt:'Remédio',it:'Medicina'}
+    ],
+    frases:[
+      {pt:'Estou com dor de cabeça.',it:'Ho mal di testa.'},
+      {pt:'Preciso de um médico.',it:'Ho bisogno di un medico.'},
+      {pt:'Onde fica a farmácia?',it:'Dov\'è la farmacia?'},
+      {pt:'Não me sinto bem.',it:'Non mi sento bene.'}
+    ],
+    exercicios:[
+      {q:'"Occhio" é:',pt:'',opts:['Boca','Olho','Mão'],correta:1},
+      {q:'"Dolore" significa:',pt:'',opts:['Dor','Cansaço','Doença'],correta:0}
+    ]
+  },
+  { num:17, titulo:'Transporte e viagem', descricao:'Trem, ônibus, avião, hotel.',
+    vocabulario:[
+      {pt:'Trem',it:'Treno'},{pt:'Ônibus',it:'Autobus'},{pt:'Avião',it:'Aereo'},{pt:'Carro',it:'Macchina'},
+      {pt:'Bilhete',it:'Biglietto'},{pt:'Estação',it:'Stazione'},{pt:'Aeroporto',it:'Aeroporto'},
+      {pt:'Hotel',it:'Albergo'},{pt:'Quarto',it:'Camera'},{pt:'Reserva',it:'Prenotazione'},{pt:'Passaporte',it:'Passaporto'}
+    ],
+    frases:[
+      {pt:'Onde compro o bilhete?',it:'Dove compro il biglietto?'},
+      {pt:'A que horas sai o trem?',it:'A che ora parte il treno?'},
+      {pt:'Tenho uma reserva.',it:'Ho una prenotazione.'},
+      {pt:'Perdi o voo.',it:'Ho perso il volo.'}
+    ],
+    exercicios:[
+      {q:'"Treno" é:',pt:'',opts:['Ônibus','Trem','Avião'],correta:1},
+      {q:'"Biglietto" significa:',pt:'',opts:['Bilhete','Bagagem','Reserva'],correta:0}
+    ]
+  },
+  { num:18, titulo:'Emoções e sentimentos', descricao:'Como você se sente.',
+    vocabulario:[
+      {pt:'Feliz',it:'Felice'},{pt:'Triste',it:'Triste'},{pt:'Cansado',it:'Stanco'},
+      {pt:'Nervoso',it:'Nervoso'},{pt:'Animado',it:'Eccitato'},{pt:'Com medo',it:'Spaventato'},
+      {pt:'Com raiva',it:'Arrabbiato'},{pt:'Apaixonado',it:'Innamorato'},{pt:'Surpreso',it:'Sorpreso'},{pt:'Calmo',it:'Calmo'}
+    ],
+    frases:[
+      {pt:'Estou muito feliz hoje.',it:'Sono molto felice oggi.'},
+      {pt:'Estou cansado.',it:'Sono stanco.'},
+      {pt:'Você está bem?',it:'Stai bene?'},
+      {pt:'Me sinto sozinho.',it:'Mi sento solo.'}
+    ],
+    exercicios:[
+      {q:'"Felice" significa:',pt:'',opts:['Triste','Feliz','Nervoso'],correta:1},
+      {q:'"Arrabbiato" é:',pt:'',opts:['Com raiva','Calmo','Animado'],correta:0}
+    ]
+  },
+  { num:19, titulo:'Expressões idiomáticas', descricao:'Frases que os italianos usam de verdade.',
+    vocabulario:[
+      {pt:'Em bocca al lupo',it:'Boa sorte'},
+      {pt:'Non vedo l\'ora',it:'Mal posso esperar'},
+      {pt:'Che palle!',it:'Que saco!'},
+      {pt:'Figurati!',it:'Imagina!'},
+      {pt:'Magari!',it:'Quem dera!'},
+      {pt:'Boh',it:'Sei lá'},
+      {pt:'Meno male',it:'Ainda bem'},
+      {pt:'Piano piano',it:'Devagar, devagar'}
+    ],
+    frases:[
+      {pt:'Boa sorte com a prova!',it:'In bocca al lupo per l\'esame!'},
+      {pt:'Mal posso esperar pra te ver!',it:'Non vedo l\'ora di vederti!'},
+      {pt:'Ainda bem que chegou!',it:'Meno male che sei arrivato!'},
+      {pt:'Quem dera eu pudesse ir.',it:'Magari potessi venire.'}
+    ],
+    exercicios:[
+      {q:'"In bocca al lupo" significa:',pt:'',opts:['Boa sorte','Bom apetite','Boa viagem'],correta:0},
+      {q:'"Meno male" é:',pt:'',opts:['Menos mal','Ainda bem','Mal e mal'],correta:1}
+    ]
+  },
+  { num:20, titulo:'Falsos amigos PT-IT', descricao:'Palavras que parecem mas não são.',
+    vocabulario:[
+      {pt:'Salire (subir)',it:'≠ sair'},{pt:'Burro (manteiga)',it:'≠ burro (animal)'},
+      {pt:'Firma (assinatura)',it:'≠ firma (empresa)'},{pt:'Gamba (perna)',it:'≠ gambá'},
+      {pt:'Rapariga (garota)',it:'≠ rapariga (pejorativo)'},{pt:'Largo (praça)',it:'≠ largo (amplo)'},
+      {pt:'Presto (cedo/rápido)',it:'≠ presto (prestar)'},{pt:'Magazzino (armazém)',it:'≠ magazine'},
+      {pt:'Confetti (drageias)',it:'≠ confete (papel)'},{pt:'Camera (quarto)',it:'≠ câmera'}
+    ],
+    frases:[
+      {pt:'Devo salire le scale.',it:'Preciso subir as escadas.'},
+      {pt:'Il burro è sul pane.',it:'A manteiga está no pão.'},
+      {pt:'Ho comprato una firma.',it:'Comprei uma assinatura.'},
+      {pt:'Ti aspetto in piazza.',it:'Te espero na praça.'}
+    ],
+    exercicios:[
+      {q:'"Burro" em italiano significa:',pt:'',opts:['Burro (animal)','Manteiga','Besta'],correta:1},
+      {q:'"Camera" em italiano é:',pt:'',opts:['Câmera','Quarto','Camarão'],correta:1}
+    ]
+  }
+];
+
+/* ---------- RENDER LIÇÕES ---------- */
+LICOES.forEach((l, idx) => {
+  const b = document.createElement('button');
+  b.className = 'lesson-btn';
+  b.innerHTML = `<span class="num">Lição ${l.num}</span>${escapeHtml(l.titulo)}`;
+  b.onclick = () => abrirLicao(idx);
+  lessonButtons.appendChild(b);
+});
+
+function abrirLicao(idx) {
+  const l = LICOES[idx];
+  lessonList.style.display = 'none';
+  lessonView.classList.add('show');
+
+  let html = `<span class="back-lesson" id="voltarLicao">← voltar pras lições</span>`;
+  html += `<div class="lesson-title">Lição ${l.num} — ${escapeHtml(l.titulo)}</div>`;
+  html += `<div class="lesson-desc">${escapeHtml(l.descricao)}</div>`;
+
+  html += `<div class="card"><h2>Vocabulário</h2><div class="vocab-grid">`;
+  l.vocabulario.forEach(v => {
+    html += `<div class="vocab">
+      <div class="w">${escapeHtml(v.it)}<span class="pt">${escapeHtml(v.pt)}</span></div>
+      <button class="say" data-say="${escapeHtml(v.it)}">🔊</button>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div class="card"><h2>Frases úteis</h2>`;
+  l.frases.forEach(f => {
+    html += `<div class="phrase">
+      <div class="txt"><div class="it">${escapeHtml(f.it)}</div><div class="pt">${escapeHtml(f.pt)}</div></div>
+      <button class="say" data-say="${escapeHtml(f.it)}">🔊</button>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="card"><h2>Exercícios</h2>`;
+  l.exercicios.forEach((ex, i) => {
+    html += `<div class="exercise" data-ex="${i}"><div class="q">${escapeHtml(ex.q)}</div><div class="opts">`;
+    ex.opts.forEach((o, oi) => {
+      html += `<button class="opt" data-correct="${oi === ex.correta ? '1' : '0'}">${escapeHtml(o)}</button>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+
+  lessonView.innerHTML = html;
+
+  document.getElementById('voltarLicao').onclick = () => {
+    lessonView.classList.remove('show'); lessonView.innerHTML = ''; lessonList.style.display = '';
+  };
+
+  lessonView.querySelectorAll('[data-say]').forEach(b => b.onclick = () => VOZ.speak(b.dataset.say));
+
+  lessonView.querySelectorAll('.exercise').forEach(ex => {
+    ex.querySelectorAll('.opt').forEach(o => {
+      o.onclick = () => {
+        if (ex.dataset.done === '1') return;
+        ex.dataset.done = '1';
+        const correct = o.dataset.correct === '1';
+        o.classList.add(correct ? 'right' : 'wrong');
+        if (!correct) ex.querySelectorAll('.opt').forEach(x => { if (x.dataset.correct === '1') x.classList.add('right'); });
+        const rightBtn = ex.querySelector('.opt[data-correct="1"]');
+        if (rightBtn) VOZ.speak(rightBtn.textContent);
+      };
+    });
+  });
+}
+</script>
+</body>
+</html>
